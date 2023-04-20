@@ -1,7 +1,8 @@
-import open from 'open';
 import { Notifier } from 'coc-helper';
 import { window, workspace } from 'coc.nvim';
 import pathLib from 'path';
+import { promisify } from 'util';
+import { exec } from 'child_process';
 import type { ActionSource } from '../../../actions/actionSource';
 import { driveList } from '../../../lists/drives';
 import { startCocList } from '../../../lists/runner';
@@ -34,6 +35,13 @@ import {
   selectWindowsUI,
 } from '../../../util';
 import type { FileNode, FileSource } from './fileSource';
+
+const execAsync = promisify(exec);
+
+const open = async (uri: string) => {
+    const { stdout: path } = await execAsync(`wslpath -w ${uri}`, { encoding: 'utf8' });
+    await execAsync(`powershell.exe -Command 'start ${path}'`);
+};
 
 export function loadFileActions(action: ActionSource<FileSource, FileNode>) {
   const { nvim } = workspace;
